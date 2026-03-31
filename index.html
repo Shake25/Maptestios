@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Retro Travel OS | 任务分级终端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+        :root { --retro-orange: #ffb000; --retro-bg: #121212; }
+        body { 
+            background-color: var(--retro-bg); color: var(--retro-orange); 
+            font-family: 'Courier Prime', monospace;
+            background-image: linear-gradient(rgba(255, 176, 0, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 176, 0, .03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .retro-border { border: 1px solid var(--retro-orange); box-shadow: 0 0 10px rgba(255, 176, 0, 0.1); }
+        input, select { background: transparent !important; border: 1px solid var(--retro-orange) !important; color: var(--retro-orange) !important; outline: none; -webkit-appearance: none; border-radius: 0; }
+        .btn-retro { background: var(--retro-orange); color: black; font-weight: bold; border-radius: 0; }
+        /* 隐藏滚动条 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="p-3 md:p-8">
+    <div class="max-w-5xl mx-auto retro-border p-4 md:p-10 relative bg-[#121212]/95">
+        <div class="absolute top-0 left-0 px-2 py-0.5 bg-[#ffb000] text-black text-[9px] font-bold uppercase">M-SYS_LOGISTICS_V6.5</div>
+        
+        <header class="mb-6 border-b border-[#ffb000] pb-4 flex justify-between items-end">
+            <div>
+                <h1 class="text-2xl md:text-4xl font-bold tracking-tighter uppercase italic">Mission Control</h1>
+                <p class="text-[9px] opacity-70">>> 正在扫描全球地理坐标库...</p>
+            </div>
+            <div id="stats" class="text-xl font-bold italic">00</div>
+        </header>
+
+        <div class="flex flex-col lg:grid lg:grid-cols-12 gap-6">
+            <aside class="lg:col-span-4 space-y-4">
+                <div class="grid grid-cols-1 gap-3">
+                    <div>
+                        <label class="text-[9px] uppercase font-bold">[ 任务分级 ]</label>
+                        <select id="type" class="w-full mt-1 p-3 text-xs cursor-pointer">
+                            <option value="OVERSEAS">🛂 跨境任务 (Overseas)</option>
+                            <option value="INTER_PROVINCIAL">🌐 跨省远征 (Province)</option>
+                            <option value="INTER_CITY">🛣️ 跨市移动 (Inter-city)</option>
+                            <option value="LOCAL">📍 同城行动 (Local)</option>
+                        </select>
