@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retro Travel OS | 任务分级终端</title>
+    <title>Retro Travel OS | 任务控制台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
@@ -14,74 +14,71 @@
             background-image: linear-gradient(rgba(255, 176, 0, .03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 176, 0, .03) 1px, transparent 1px);
             background-size: 20px 20px;
         }
-        .retro-border { border: 1px solid var(--retro-orange); box-shadow: 0 0 15px rgba(255, 176, 0, 0.1); }
-        /* 针对移动端优化输入框高度和文字大小 */
+        .retro-border { border: 1px solid var(--retro-orange); }
         input, select { 
-            background: transparent !important; 
+            background: rgba(0,0,0,0.5) !important; 
             border: 1px solid var(--retro-orange) !important; 
             color: var(--retro-orange) !important; 
             outline: none; 
-            -webkit-appearance: none; 
             border-radius: 0;
-            font-size: 14px !important;
+            padding: 12px;
+            font-size: 14px;
+            width: 100%;
         }
         .btn-retro { 
             background: var(--retro-orange); 
             color: black; 
             font-weight: bold; 
-            border-radius: 0;
-            transition: all 0.2s;
+            width: 100%;
+            padding: 15px;
+            text-transform: uppercase;
+            cursor: pointer;
         }
-        .btn-retro:active { transform: scale(0.98); filter: brightness(1.2); }
+        .btn-retro:active { opacity: 0.7; transform: scale(0.98); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="p-2 md:p-8">
-    <div class="max-w-6xl mx-auto retro-border min-h-[90vh] p-4 md:p-10 relative bg-[#121212]/95 flex flex-col">
-        <div class="absolute top-0 left-0 px-2 py-0.5 bg-[#ffb000] text-black text-[9px] font-bold uppercase">M-SYS_LOGISTICS_V6.5</div>
+<body class="p-4">
+    <div class="max-w-4xl mx-auto retro-border p-5 relative bg-[#121212]/90 min-h-[80vh]">
+        <div class="absolute top-0 left-0 px-2 py-0.5 bg-[#ffb000] text-black text-[9px] font-bold uppercase">M-SYS_LOGISTICS_V6.6</div>
         
         <header class="mb-8 border-b border-[#ffb000] pb-4 flex justify-between items-end">
             <div>
-                <h1 class="text-2xl md:text-5xl font-bold tracking-tighter uppercase italic">Mission Control</h1>
-                <p class="text-[10px] mt-1 opacity-70 tracking-widest">>> 终端系统自适应模式已开启...</p>
+                <h1 class="text-3xl font-bold tracking-tighter uppercase italic">Mission Control</h1>
+                <p class="text-[10px] opacity-70">>> 系统正常运行中...</p>
             </div>
-            <div id="stats" class="text-2xl font-bold italic border-l border-[#ffb000] pl-4">00</div>
+            <div id="stats" class="text-2xl font-bold">00</div>
         </header>
 
-        <div class="flex flex-col lg:grid lg:grid-cols-12 gap-8 flex-1">
-            
-            <aside class="lg:col-span-4 space-y-6">
-                <div class="flex flex-col gap-5">
-                    <div class="w-full">
-                        <label class="text-[10px] uppercase font-bold block mb-1 opacity-80">[ 任务分级 ]</label>
-                        <select id="type" class="w-full p-4">
-                            <option value="OVERSEAS">🛂 跨境任务 (Overseas)</option>
-                            <option value="INTER_PROVINCIAL">🌐 跨省远征 (Province)</option>
-                            <option value="INTER_CITY">🛣️ 跨市移动 (Inter-city)</option>
-                            <option value="LOCAL">📍 同城行动 (Local)</option>
-                        </select>
-                    </div>
-                    <div class="w-full">
-                        <label class="text-[10px] uppercase font-bold block mb-1 opacity-80">[ 目标名称 ]</label>
-                        <input id="title" type="text" placeholder="Mission Name" class="w-full p-4">
-                    </div>
-                    <div class="w-full">
-                        <label class="text-[10px] uppercase font-bold block mb-1 opacity-80">[ 部署日期 ]</label>
-                        <input id="date" type="date" class="w-full p-4">
-                    </div>
-                    <button onclick="saveItem()" class="w-full btn-retro py-5 text-xs uppercase tracking-widest mt-2">Initialize Mission</button>
-                </div>
-            </aside>
+        <section class="mb-10 space-y-4">
+            <div>
+                <label class="text-[10px] font-bold uppercase">[ 任务分级 ]</label>
+                <select id="type_input">
+                    <option value="OVERSEAS">🛂 跨境任务</option>
+                    <option value="INTER_PROVINCIAL">🌐 跨省远征</option>
+                    <option value="INTER_CITY">🛣️ 跨市移动</option>
+                    <option value="LOCAL">📍 同城行动</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-[10px] font-bold uppercase">[ 目标名称 ]</label>
+                <input id="title_input" type="text" placeholder="例如：香港两日游">
+            </div>
+            <div>
+                <label class="text-[10px] font-bold uppercase">[ 部署日期 ]</label>
+                <input id="date_input" type="date">
+            </div>
+            <button onclick="saveMission()" class="btn-retro">Initialize Mission</button>
+        </section>
 
-            <main class="lg:col-span-8 flex flex-col">
-                <h2 class="text-[10px] font-bold mb-4 uppercase opacity-50 tracking-[0.2em]">>> 行程数据库读取中</h2>
-                <div id="list-container" class="space-y-4 overflow-y-auto no-scrollbar flex-1 pb-10">
-                    </div>
-            </main>
-        </div>
+        <section>
+            <h2 class="text-[10px] font-bold mb-4 opacity-50 uppercase tracking-widest">>> 任务数据库</h2>
+            <div id="list-container" class="space-y-3"></div>
+        </section>
     </div>
 
     <script>
+        // 初始化数据
         let travelData = JSON.parse(localStorage.getItem('retro_travel_data')) || [];
 
         function render() {
@@ -89,50 +86,71 @@
             container.innerHTML = '';
             
             if (travelData.length === 0) {
-                container.innerHTML = `<div class="border border-[#ffb000]/20 p-10 text-center text-[10px] opacity-40 italic uppercase tracking-widest">暂无活跃任务 / Waiting for data...</div>`;
+                container.innerHTML = `<div class="text-center py-10 opacity-30 italic text-sm">NO MISSIONS FOUND</div>`;
             }
 
             travelData.forEach((item, index) => {
                 const card = document.createElement('div');
-                card.className = 'border border-[#ffb000]/40 p-5 flex items-center bg-black/40 active:bg-[#ffb000]/20 transition-all cursor-pointer group hover:border-[#ffb000]';
+                card.className = 'border border-[#ffb000]/40 p-4 flex justify-between items-center bg-black/20';
                 card.onclick = (e) => { if(e.target.tagName !== 'BUTTON') goToDetails(index); };
                 
                 card.innerHTML = `
-                    <div class="flex-1">
-                        <div class="text-[9px] opacity-50 uppercase tracking-[0.1em]">${item.type} // ${item.date || 'TBD'}</div>
-                        <h3 class="text-xl font-bold mt-1 uppercase tracking-tight group-hover:pl-2 transition-all">${item.title}</h3>
+                    <div>
+                        <div class="text-[9px] opacity-60 uppercase">${item.type} // ${item.date || 'TBD'}</div>
+                        <div class="text-lg font-bold uppercase">${item.title}</div>
                     </div>
-                    <button onclick="removeItem(event, ${index})" class="text-[10px] border border-[#ffb000]/40 px-4 py-2 hover:bg-red-900/40 active:bg-red-600 active:text-white transition-colors">ERASE</button>
+                    <button onclick="removeMission(event, ${index})" class="text-[10px] border border-[#ffb000]/40 px-3 py-1">ERASE</button>
                 `;
                 container.appendChild(card);
             });
+
+            // 更新计数器
             document.getElementById('stats').innerText = travelData.length.toString().padStart(2, '0');
+            // 同步到存储
             localStorage.setItem('retro_travel_data', JSON.stringify(travelData));
         }
 
-        function saveItem() {
-            const title = document.getElementById('title').value;
-            if (!title) {
-                alert("请输入目标名称！");
+        function saveMission() {
+            const titleVal = document.getElementById('title_input').value;
+            const typeVal = document.getElementById('type_input').value;
+            const dateVal = document.getElementById('date_input').value;
+
+            if (!titleVal) {
+                alert("ERR: MISSION NAME REQUIRED");
                 return;
             }
-            travelData.push({ 
-                type: document.getElementById('type').value, 
-                title: title, 
-                date: document.getElementById('date').value, 
-                sub_plans: [] 
-            });
+
+            // 创建新对象
+            const newMission = {
+                type: typeVal,
+                title: titleVal,
+                date: dateVal,
+                sub_plans: [] // 初始子计划为空
+            };
+
+            // 压入数组并渲染
+            travelData.push(newMission);
             render();
-            document.getElementById('title').value = '';
+
+            // 清空输入框
+            document.getElementById('title_input').value = '';
         }
 
-        function removeItem(e, index) { 
-            e.stopPropagation(); 
-            if(confirm("确定要永久抹除此项任务吗？")) {
-                travelData.splice(index, 1); 
-                render(); 
+        function removeMission(e, index) {
+            e.stopPropagation();
+            if(confirm("CONFIRM ERASE?")) {
+                travelData.splice(index, 1);
+                render();
             }
         }
 
-        function goToDetails(index) { 
-            localStorage.setItem('current_trip
+        function goToDetails(index) {
+            localStorage.setItem('current_trip_index', index);
+            window.location.href = 'details.html';
+        }
+
+        // 页面加载后首次渲染
+        window.onload = render;
+    </script>
+</body>
+</html>
