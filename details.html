@@ -11,10 +11,10 @@
         :root { --retro-orange: #ffb000; --retro-bg: #121212; }
         body { background-color: var(--retro-bg); color: var(--retro-orange); font-family: 'Courier Prime', monospace; -webkit-tap-highlight-color: transparent; }
         .retro-border { border: 1px solid var(--retro-orange); }
-        input { background: transparent; border: 1px solid var(--retro-orange); color: var(--retro-orange); outline: none; padding: 12px; font-size: 14px; border-radius: 0; }
+        input { background: rgba(0,0,0,0.5); border: 1px solid var(--retro-orange); color: var(--retro-orange); outline: none; padding: 12px; font-size: 14px; border-radius: 0; }
         
-        /* 地图滤镜与手机端点击穿透 */
-        #map-container iframe { filter: invert(90%) hue-rotate(150deg) brightness(0.8) contrast(1.2); mix-blend-mode: screen; pointer-events: auto; }
+        /* 地图黑金滤镜 */
+        #map-container iframe { filter: invert(90%) hue-rotate(150deg) brightness(0.8) contrast(1.2); mix-blend-mode: screen; }
 
         /* 移动端拖拽卡片样式 */
         .plan-card { border-left: 4px solid var(--retro-orange); background: rgba(255,176,0,0.03); }
@@ -28,14 +28,15 @@
 
         .tip-box { font-size: 10px; color: #fff; background: rgba(255,176,0,0.15); padding: 5px 8px; margin-top: 6px; display: block; border-radius: 2px; line-height: 1.4; }
         .tag-icon { border: 1px solid var(--retro-orange); padding: 0 4px; font-size: 9px; font-weight: bold; margin-right: 6px; text-transform: uppercase; }
-        .scanline { width: 100%; height: 2px; background: rgba(255, 176, 0, 0.05); position: absolute; animation: scan 4s linear infinite; pointer-events: none; }
+        
+        .scanline { width: 100%; height: 2px; background: rgba(255, 176, 0, 0.05); position: absolute; animation: scan 4s linear infinite; pointer-events: none; z-index: 50; }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
 <body class="p-3 md:p-8">
     <div class="max-w-6xl mx-auto retro-border p-4 md:p-10 relative bg-[#121212] overflow-hidden">
         <div class="scanline"></div>
-        <a href="index.html" class="text-[10px] uppercase tracking-widest hover:underline"><< BACK_TO_ROOT</a>
+        <a href="index.html" class="text-[10px] uppercase tracking-widest hover:underline"><< BACK_TO_OS</a>
         
         <header class="mt-4 mb-6 border-b border-[#ffb000] pb-4 flex justify-between items-end">
             <div>
@@ -46,7 +47,14 @@
         </header>
 
         <div class="flex flex-col gap-6">
-            <section class="order-2 lg:order-1">
+            <section>
+                <h2 class="text-[10px] font-bold mb-2 uppercase opacity-60">>> 动态坐标映射 [MAP_RADAR]</h2>
+                <div id="map-container" class="retro-border h-[280px] md:h-[450px] bg-black relative overflow-hidden">
+                    <iframe id="map-iframe" width="100%" height="100%" frameborder="0" style="border:0;" allowfullscreen></iframe>
+                </div>
+            </section>
+
+            <section>
                 <div class="flex flex-col gap-2 mb-8">
                     <div class="flex gap-2">
                         <input id="sub-time" type="text" placeholder="12:00" class="w-20">
@@ -58,25 +66,18 @@
                 <div id="sub-list" class="space-y-4">
                     </div>
             </section>
-
-            <section class="order-1 lg:order-2">
-                <h2 class="text-[10px] font-bold mb-2 uppercase opacity-60">>> 动态坐标映射 [MAP_RADAR]</h2>
-                <div id="map-container" class="retro-border h-[280px] md:h-[450px] bg-black relative overflow-hidden">
-                    <iframe id="map-iframe" width="100%" height="100%" frameborder="0" src="" allowfullscreen></iframe>
-                </div>
-            </section>
         </div>
     </div>
 
     <script>
-        let travelData = JSON.parse(localStorage.getItem('retro_travel_data'));
+        let travelData = JSON.parse(localStorage.getItem('retro_travel_data')) || [];
         let index = localStorage.getItem('current_trip_index');
         let trip = travelData[index];
 
         const config = {
             keywords: {
-                '高铁': { label: 'TRANSIT', icon: '🚄', tip: '建议提前30min到站，注意检票口信息。' },
-                '酒店': { label: 'LODGING', icon: '🏨', tip: '确认前台是否保留房间，检查消防。' },
+                '高铁': { label: 'TRANSIT', icon: '🚄', tip: '建议提前30min到站，检查检票口信息。' },
+                '酒店': { label: 'LODGING', icon: '🏨', tip: '确认前台是否保留房间，检查消防设施。' },
                 '住': { label: 'LODGING', icon: '🏠', tip: '确认退房限制与行李寄存。' },
                 '爬山': { label: 'ACTION', icon: '🏔️', tip: '穿防滑鞋，备好充足水分和速干衣。' },
                 '餐': { label: 'SUPPLY', icon: '🍴', tip: '建议提前排号，注意饮食卫生。' },
@@ -85,16 +86,18 @@
             default: { label: 'TARGET', icon: '📍', tip: '确认环境安全，保持通讯顺畅。' }
         };
 
+        // 初始化拖拽
         const subListEl = document.getElementById('sub-list');
         Sortable.create(subListEl, {
             animation: 250,
-            handle: '.drag-handle', // 必须按住手柄
+            handle: '.drag-handle',
             ghostClass: 'sortable-ghost',
             dragClass: 'sortable-drag',
             onEnd: saveOrder
         });
 
         function render() {
+            if (!trip) return;
             document.getElementById('main-title').innerText = trip.title;
             const list = document.getElementById('sub-list');
             list.innerHTML = '';
@@ -114,11 +117,11 @@
                                 <div class="flex flex-wrap items-center gap-1">
                                     <span class="tag-icon">${meta.label}</span>
                                     <span class="text-[10px] opacity-50 mr-2">${p.time}</span>
-                                    <span class="font-bold text-sm tracking-wide uppercase">${meta.icon} ${p.place}</span>
+                                    <span class="font-bold text-sm uppercase">${meta.icon} ${p.place}</span>
                                 </div>
                                 <div class="tip-box">💡 RECOM: ${meta.tip}</div>
                             </div>
-                            <button onclick="delSub(${i})" class="text-[11px] p-2 opacity-60 active:opacity-100">ERASE</button>
+                            <button onclick="delSub(${i})" class="text-[11px] p-2 opacity-60 active:opacity-100">✕</button>
                         </div>
                     </div>
                 `;
@@ -148,15 +151,20 @@
             render();
         }
 
-        function delSub(i) { trip.sub_plans.splice(i, 1); render(); }
+        function delSub(i) {
+            if(confirm("确定删除此项？")) {
+                trip.sub_plans.splice(i, 1);
+                render();
+            }
+        }
 
         function updateMap() {
             const mapIframe = document.getElementById('map-iframe');
-            if (trip.sub_plans.length > 0) {
+            if (trip && trip.sub_plans.length > 0) {
                 const latestPlace = trip.sub_plans[trip.sub_plans.length - 1].place;
-                // 使用强制 HTTPS 的 Embed 接口，适配移动浏览器安全策略
-                const searchUrl = `https://maps.google.com/maps?q=${encodeURIComponent(latestPlace)}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
-                mapIframe.src = searchUrl;
+                // 使用 HTTPS 协议的 OpenStreetMap 搜索接口，兼容性最高
+                const q = encodeURIComponent(latestPlace);
+                mapIframe.src = `https://www.openstreetmap.org/export/embed.html?bbox=0,0,0,0&layer=mapnik&q=${q}`;
             } else {
                 mapIframe.src = "about:blank";
             }
